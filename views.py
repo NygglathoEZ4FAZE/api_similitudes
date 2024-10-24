@@ -151,7 +151,7 @@ def evaluate_user_response(request):
             best_response = find_best_response_response(user_response, id, instrucciones, respuestas, threshold)
 
             # Devolver la mejor respuesta en formato JSON
-            return JsonResponse({'response': best_response}, status=200)
+            return best_response
 
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
