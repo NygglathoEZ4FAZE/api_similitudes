@@ -14,4 +14,4 @@ RUN pip3 install -r requirements.txt
 COPY . .
 
 # Ejecuta las migraciones y luego inicia el servidor con Gunicorn
-CMD HOME=/root python3 manage.py runserver 0.0.0.0:8000 --noreload
+CMD ["sh", "-c", "python manage.py migrate && gunicorn --bind 0.0.0.0:8000 myproject.wsgi:application"]

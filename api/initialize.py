@@ -1,4 +1,4 @@
-from .models import load_model
+from .utils import load_model
 
 # Cargar el modelo en la inicialización
 tokenizaer_loader, model_loader = load_model()
