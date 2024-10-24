@@ -71,7 +71,7 @@ def get_embedding_response(text):
     else:
         raise ValueError("La entrada debe ser una cadena de texto.")
     
-def find_best_response_response(user_response, respuestas, threshold=0.8):  # Establecer un valor por defecto
+def find_best_response_response(user_response, id, instrucciones, respuestas, threshold=0.8):  # Establecer un valor por defecto
     if not isinstance(user_response, str):
         raise ValueError("user_response debe ser una cadena de texto.")
     response_vector = get_embedding_response(user_response)
@@ -92,12 +92,21 @@ def find_best_response_response(user_response, respuestas, threshold=0.8):  # Es
     valid_indices = [i for i, score in enumerate(similarities) if score >= threshold]
 
     if not valid_indices:
-        best_response = None  # Cambia esto para que sea None si no hay coincidencias
+        best_response = None  # Si no hay coincidencias válidas
+        best_id = None
+        best_instruction = None
     else:
         best_match_index = valid_indices[similarities[valid_indices].argmax().item()]
-        best_response = respuestas[best_match_index]  # Cambia para obtener la respuesta
+       # Obtener la mejor respuesta, su id y su instrucción
+        best_response = respuestas[best_match_index]
+        best_id = id[best_match_index]
+        best_instruction = instrucciones[best_match_index]
 
-    return best_response  # Solo retornar la mejor respuesta
+    return  {
+        'best_id': best_id,
+        'best_instruction': best_instruction,
+        'best_response': best_response
+    }
 
 #Clases para cada función
 @csrf_exempt
@@ -133,14 +142,16 @@ def evaluate_user_response(request):
             # Obtener los datos del cuerpo de la solicitud
             data = json.loads(request.body)
             user_response = data.get('user_response', '')
+            id = data.get('id', [])
+            instrucciones = data.get('instrucciones', [])
             respuestas = data.get('respuestas', [])
             threshold = data.get('threshold', 0.9)  # Valor por defecto si no se proporciona
 
             # Llamar a la función find_best_response_response
-            best_response = find_best_response_response(user_response, respuestas, threshold)
+            best_response = find_best_response_response(user_response, id, instrucciones, respuestas, threshold)
 
             # Devolver la mejor respuesta en formato JSON
-            return JsonResponse({'response': best_response}, status=200)
+            return best_response
 
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
