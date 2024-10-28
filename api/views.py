@@ -71,12 +71,13 @@ def get_embedding_response(text):
     else:
         raise ValueError("La entrada debe ser una cadena de texto.")
     
-def find_best_response_response(user_response, id, instrucciones, respuestas, threshold=0.8):  # Establecer un valor por defecto
+def find_best_response_response(user_response, id, instrucciones, respuestas, threshold=0.8):
     if not isinstance(user_response, str):
         raise ValueError("user_response debe ser una cadena de texto.")
+    
     response_vector = get_embedding_response(user_response)
-
     respuestas_vectors = []
+
     for resp in respuestas:
         if isinstance(resp, str):
             embedding = get_embedding_response(resp)
@@ -85,24 +86,28 @@ def find_best_response_response(user_response, id, instrucciones, respuestas, th
             raise ValueError("Cada respuesta debe ser una cadena de texto.")
 
     respuestas_vectors = torch.vstack(respuestas_vectors)
-
     similarities = F.cosine_similarity(response_vector, respuestas_vectors)
 
-    # Filtrar respuestas por el umbral
+    # Filtrar respuestas por el umbral y obtener las similitudes correspondientes
     valid_indices = [i for i, score in enumerate(similarities) if score >= threshold]
+    valid_similarities = [similarities[i] for i in valid_indices]
 
     if not valid_indices:
-        best_response = None  # Si no hay coincidencias válidas
+        # Si no hay coincidencias válidas
+        best_response = None
         best_id = None
         best_instruction = None
     else:
-        best_match_index = valid_indices[similarities[valid_indices].argmax().item()]
-       # Obtener la mejor respuesta, su id y su instrucción
+        # Obtener el índice del valor máximo en valid_similarities
+        best_match_index_in_valid = torch.argmax(torch.tensor(valid_similarities)).item()
+        best_match_index = valid_indices[best_match_index_in_valid]
+        
+        # Obtener la mejor respuesta, su id y su instrucción
         best_response = respuestas[best_match_index]
         best_id = id[best_match_index]
         best_instruction = instrucciones[best_match_index]
 
-    return  {
+    return {
         'best_id': best_id,
         'best_instruction': best_instruction,
         'best_response': best_response
