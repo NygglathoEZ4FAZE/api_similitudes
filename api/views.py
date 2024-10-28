@@ -141,17 +141,13 @@ def evaluate_user_response(request):
         try:
             # Obtener los datos del cuerpo de la solicitud
             data = json.loads(request.body)
-            user_response = data.get('user_response', '')
-            id = data.get('id', [])
-            instrucciones = data.get('instrucciones', [])
-            respuestas = data.get('respuestas', [])
-            threshold = data.get('threshold', 0.9)  # Valor por defecto si no se proporciona
+            user_response = data.get("user_response")
+            id = data.get("id")
+            instrucciones = data.get("instrucciones")
+            respuestas = data.get("respuestas")
 
-            # Llamar a la función find_best_response_response
-            best_response = find_best_response_response(user_response, id, instrucciones, respuestas, threshold)
-
-            # Devolver la mejor respuesta en formato JSON
-            return best_response
+            result = find_best_response_response(user_response, id, instrucciones, respuestas)
+            return JsonResponse(result)
 
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
