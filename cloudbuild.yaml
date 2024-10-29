@@ -1,0 +1,16 @@
+steps:
+  # Construcción de la imagen Docker
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/proyecto_manejo_similitudes', '.']
+
+  # Subida de la imagen al contenedor de Google
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/proyecto_manejo_similitudes']
+
+# Despliega en Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args: ['run', 'deploy', 'proyecto_manejo_similitudes', '--image', 'gcr.io/$PROJECT_ID/proyecto_manejo_similitudes', '--platform', 'managed', '--region', 'us-central1', '--allow-unauthenticated']
+
+images:
+  - 'gcr.io/$PROJECT_ID/proyecto_manejo_similitudes'
