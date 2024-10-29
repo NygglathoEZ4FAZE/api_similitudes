@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 8000
 
 # Ejecuta las migraciones y luego inicia el servidor con Gunicorn
-CMD HOME=/root python3 manage.py runserver 0.0.0.0:8000 --noreload
+CMD HOME=/root python3 manage.py migrate && gunicorn proyecto_manejo_similitudes.wsgi:application --bind 0.0.0.0:8000
